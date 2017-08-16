@@ -14,7 +14,6 @@
 #define S_CUSTOM_SIZE                  "use_custom_size"
 #define S_SLIDE_TIME                   "slide_time"
 #define S_TRANSITION                   "transition"
-#define S_RANDOMIZE                    "randomize"
 #define S_LOOP                         "loop"
 #define S_HIDE                         "hide"
 #define S_FILES                        "files"
@@ -37,7 +36,6 @@
 #define T_CUSTOM_SIZE_AUTO             T_("CustomSize.Auto")
 #define T_SLIDE_TIME                   T_("SlideTime")
 #define T_TRANSITION                   T_("Transition")
-#define T_RANDOMIZE                    T_("Randomize")
 #define T_LOOP                         T_("Loop")
 #define T_HIDE                         T_("HideWhenDone")
 #define T_FILES                        T_("Files")
@@ -71,7 +69,6 @@ enum behavior {
 struct slideshow {
 	obs_source_t *source;
 
-	bool randomize;
 	bool loop;
 	bool restart_on_activate;
 	bool pause_on_deactivate;
@@ -96,12 +93,6 @@ struct slideshow {
 	DARRAY(struct image_file_data) files;
 
 	enum behavior behavior;
-
-	obs_hotkey_id play_pause_hotkey;
-	obs_hotkey_id restart_hotkey;
-	obs_hotkey_id stop_hotkey;
-	obs_hotkey_id next_hotkey;
-	obs_hotkey_id prev_hotkey;
 };
 
 static obs_source_t *get_transition(struct slideshow *ss)
@@ -160,11 +151,6 @@ static void free_files(struct darray *array)
 	}
 
 	da_free(files);
-}
-
-static inline size_t random_file(struct slideshow *ss)
-{
-	return (size_t)rand() % ss->files.num;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -292,7 +278,6 @@ static void ss_update(void *data, obs_data_t *settings)
 	else
 		tr_name = "fade_transition";
 
-	ss->randomize = obs_data_get_bool(settings, S_RANDOMIZE);
 	ss->loop = obs_data_get_bool(settings, S_LOOP);
 	ss->hide = obs_data_get_bool(settings, S_HIDE);
 
@@ -427,8 +412,6 @@ static void ss_update(void *data, obs_data_t *settings)
 	obs_transition_set_scale_type(ss->transition,
 			OBS_TRANSITION_SCALE_ASPECT);
 
-	if (ss->randomize && ss->files.num)
-		ss->cur_item = random_file(ss);
 	if (new_tr)
 		obs_source_add_active_child(ss->source, new_tr);
 	if (ss->files.num)
@@ -499,72 +482,6 @@ static void ss_previous_slide(void *data)
 	do_transition(ss, false);
 }
 
-static void play_pause_hotkey(void *data, obs_hotkey_id id,
-		obs_hotkey_t *hotkey, bool pressed)
-{
-	UNUSED_PARAMETER(id);
-	UNUSED_PARAMETER(hotkey);
-
-	struct slideshow *ss = data;
-
-	if (pressed && obs_source_active(ss->source))
-		ss_play_pause(ss);
-}
-
-static void restart_hotkey(void *data, obs_hotkey_id id,
-		obs_hotkey_t *hotkey, bool pressed)
-{
-	UNUSED_PARAMETER(id);
-	UNUSED_PARAMETER(hotkey);
-
-	struct slideshow *ss = data;
-
-	if (pressed && obs_source_active(ss->source))
-		ss_restart(ss);
-}
-
-static void stop_hotkey(void *data, obs_hotkey_id id,
-		obs_hotkey_t *hotkey, bool pressed)
-{
-	UNUSED_PARAMETER(id);
-	UNUSED_PARAMETER(hotkey);
-
-	struct slideshow *ss = data;
-
-	if (pressed && obs_source_active(ss->source))
-		ss_stop(ss);
-}
-
-static void next_slide_hotkey(void *data, obs_hotkey_id id,
-		obs_hotkey_t *hotkey, bool pressed)
-{
-	UNUSED_PARAMETER(id);
-	UNUSED_PARAMETER(hotkey);
-
-	struct slideshow *ss = data;
-
-	if (!ss->manual)
-		return;
-
-	if (pressed && obs_source_active(ss->source))
-		ss_next_slide(ss);
-}
-
-static void previous_slide_hotkey(void *data, obs_hotkey_id id,
-		obs_hotkey_t *hotkey, bool pressed)
-{
-	UNUSED_PARAMETER(id);
-	UNUSED_PARAMETER(hotkey);
-
-	struct slideshow *ss = data;
-
-	if (!ss->manual)
-		return;
-
-	if (pressed && obs_source_active(ss->source))
-		ss_previous_slide(ss);
-}
-
 static void ss_destroy(void *data)
 {
 	struct slideshow *ss = data;
@@ -584,31 +501,6 @@ static void *ss_create(obs_data_t *settings, obs_source_t *source)
 	ss->manual = false;
 	ss->paused = false;
 	ss->stop = false;
-
-	ss->play_pause_hotkey = obs_hotkey_register_source(source,
-			"SlideShow.PlayPause",
-			obs_module_text("SlideShow.PlayPause"),
-			play_pause_hotkey, ss);
-
-	ss->restart_hotkey = obs_hotkey_register_source(source,
-			"SlideShow.Restart",
-			obs_module_text("SlideShow.Restart"),
-			restart_hotkey, ss);
-
-	ss->stop_hotkey = obs_hotkey_register_source(source,
-			"SlideShow.Stop",
-			obs_module_text("SlideShow.Stop"),
-			stop_hotkey, ss);
-
-	ss->prev_hotkey = obs_hotkey_register_source(source,
-			"SlideShow.NextSlide",
-			obs_module_text("SlideShow.NextSlide"),
-			next_slide_hotkey, ss);
-
-	ss->prev_hotkey = obs_hotkey_register_source(source,
-			"SlideShow.PreviousSlide",
-			obs_module_text("SlideShow.PreviousSlide"),
-			previous_slide_hotkey, ss);
 
 	pthread_mutex_init_value(&ss->mutex);
 	if (pthread_mutex_init(&ss->mutex, NULL) != 0)
@@ -644,7 +536,7 @@ static void ss_video_tick(void *data, float seconds)
 	if (!ss->transition || !ss->slide_time)
 		return;
 
-	if (ss->restart_on_activate && !ss->randomize && ss->use_cut) {
+	if (ss->restart_on_activate && ss->use_cut) {
 		ss->elapsed = 0.0f;
 		ss->cur_item = 0;
 		do_transition(ss, false);
@@ -671,15 +563,7 @@ static void ss_video_tick(void *data, float seconds)
 			return;
 		}
 
-		if (ss->randomize) {
-			size_t next = ss->cur_item;
-			if (ss->files.num > 1) {
-				while (next == ss->cur_item)
-					next = random_file(ss);
-			}
-			ss->cur_item = next;
-
-		} else if (++ss->cur_item >= ss->files.num) {
+		if (++ss->cur_item >= ss->files.num) {
 			ss->cur_item = 0;
 		}
 
@@ -767,11 +651,19 @@ static void ss_defaults(obs_data_t *settings)
 	obs_data_set_default_string(settings, S_TRANSITION, "fade");
 	obs_data_set_default_int(settings, S_SLIDE_TIME, 8000);
 	obs_data_set_default_int(settings, S_TR_SPEED, 700);
-	obs_data_set_default_string(settings, S_CUSTOM_SIZE, T_CUSTOM_SIZE_AUTO);
+	struct obs_video_info ovi;
+	int cx;
+	int cy;
+	obs_get_video_info(&ovi);
+	cx = (int)ovi.base_width;
+	cy = (int)ovi.base_height;
+	char str[32];
+	snprintf(str, 32, "%dx%d", cx, cy);
+	obs_data_set_default_string(settings, S_CUSTOM_SIZE, str);
 	obs_data_set_default_string(settings, S_BEHAVIOR,
 			S_BEHAVIOR_ALWAYS_PLAY);
 	obs_data_set_default_string(settings, S_MODE, S_MODE_AUTO);
-	obs_data_set_default_bool(settings, S_LOOP, true);
+	obs_data_set_default_bool(settings, S_LOOP, false);
 }
 
 static const char *file_filter =
@@ -831,7 +723,6 @@ static obs_properties_t *ss_properties(void *data)
 			0, 3600000, 50);
 	obs_properties_add_bool(ppts, S_LOOP, T_LOOP);
 	obs_properties_add_bool(ppts, S_HIDE, T_HIDE);
-	obs_properties_add_bool(ppts, S_RANDOMIZE, T_RANDOMIZE);
 
 	p = obs_properties_add_list(ppts, S_CUSTOM_SIZE, T_CUSTOM_SIZE,
 			OBS_COMBO_TYPE_EDITABLE, OBS_COMBO_FORMAT_STRING);
