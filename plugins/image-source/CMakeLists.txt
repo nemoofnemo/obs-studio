@@ -5,12 +5,18 @@ if(MSVC)
 		w32-pthreads)
 endif()
 
+set(image-source_HEADERS
+	multiple-image-source.h)
+
 set(image-source_SOURCES
 	image-source.c
 	color-source.c
-	obs-slideshow.c)
+	obs-slideshow.c
+	multiple-image-source.c
+	pen-source.c)
 
 add_library(image-source MODULE
+	${image-source_HEADERS}
 	${image-source_SOURCES})
 target_link_libraries(image-source
 	libobs

@@ -286,6 +286,9 @@ OBSBasic::OBSBasic(QWidget *parent)
 	assignDockToggle(ui->mixerDock, ui->toggleMixer);
 	assignDockToggle(ui->transitionsDock, ui->toggleTransitions);
 	assignDockToggle(ui->controlsDock, ui->toggleControls);
+
+	//test
+	connect(ui->testButton, &QPushButton::clicked, this, &OBSBasic::on_testButton_clicked);
 }
 
 static void SaveAudioDevice(const char *name, int channel, obs_data_t *parent,
@@ -5670,4 +5673,54 @@ void OBSBasic::on_stats_triggered()
 	statsDlg = new OBSBasicStats(nullptr);
 	statsDlg->show();
 	stats = statsDlg;
+}
+
+void OBSBasic::on_testButton_clicked(){
+	static int _cnt = 0;
+	if (_cnt == 0){
+		OBSScene scene = GetCurrentScene();
+		if (!scene)
+			return;
+
+		obs_data_t * settings = obs_data_create();
+		obs_data_array_t * arr = obs_data_array_create();
+		obs_data_t * item = obs_data_create();
+		obs_data_set_string(item, "value", "C:/Users/nemo/Pictures/Saved Pictures/5d4b1990f19600ae67ab5cd778c0ebd4.jpg");
+		obs_data_array_push_back(arr, item);
+		obs_data_release(item);
+		item = obs_data_create();
+		obs_data_set_string(item, "value", "C:/Users/nemo/Pictures/Saved Pictures/498da2d89f1878e408225405ac794feb.jpg");
+		obs_data_array_push_back(arr, item);
+		obs_data_release(item);
+		item = obs_data_create();
+		obs_data_set_string(item, "value", "C:/Users/nemo/Pictures/Saved Pictures/b8ce878cf1f7c2f5db3da241cdbda9fe.jpg");
+		obs_data_array_push_back(arr, item);
+		obs_data_release(item);
+		obs_data_set_array(settings, "files", arr);
+		obs_data_array_release(arr);
+
+		obs_source_t * source = obs_source_create("multiple_image_source", "ppt", settings, NULL);
+		obs_data_release(settings);
+
+		if (source) {
+			obs_scene_atomic_update(scene, [](void *data, obs_scene_t *scene){
+				obs_scene_add(scene, (obs_source_t *)data);
+			}, source);
+		}
+
+		obs_source_update(source, settings);
+
+		obs_source_release(source);
+		_cnt++;
+	}
+	else{
+		OBSScene scene = GetCurrentScene();
+		if (!scene)
+			return;
+		obs_sceneitem_t * item = obs_scene_find_source(scene, "ppt");
+		obs_source_t * s = obs_sceneitem_get_source(item);
+		OBSData settings = obs_source_get_settings(s);
+		obs_data_set_string(settings, "direction", "next");
+		obs_data_release(settings);
+	}
 }

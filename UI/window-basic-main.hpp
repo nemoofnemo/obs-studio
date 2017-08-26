@@ -669,6 +669,9 @@ private slots:
 	void OpenSourceWindow();
 	void OpenSceneWindow();
 
+	//test
+	void on_testButton_clicked();
+
 public slots:
 	void on_actionResetTransform_triggered();
 

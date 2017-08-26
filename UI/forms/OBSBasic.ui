@@ -103,7 +103,7 @@
      <x>0</x>
      <y>0</y>
      <width>1079</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -629,7 +629,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>230</width>
+          <width>218</width>
           <height>16</height>
          </rect>
         </property>
@@ -1010,6 +1010,13 @@
        </property>
        <property name="text">
         <string>Exit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="testButton">
+       <property name="text">
+        <string>test</string>
        </property>
       </widget>
      </item>
@@ -1570,26 +1577,26 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>OBSBasicPreview</class>
-   <extends>QWidget</extends>
-   <header>window-basic-preview.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>OBSBasicStatusBar</class>
-   <extends>QStatusBar</extends>
-   <header>window-basic-status-bar.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>VScrollArea</class>
    <extends>QScrollArea</extends>
    <header>vertical-scroll-area.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>OBSBasicPreview</class>
+   <extends>QWidget</extends>
+   <header>window-basic-preview.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>SourceListWidget</class>
    <extends>QListWidget</extends>
    <header>source-list-widget.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>OBSBasicStatusBar</class>
+   <extends>QStatusBar</extends>
+   <header>window-basic-status-bar.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>
