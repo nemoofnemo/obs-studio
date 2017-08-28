@@ -5,6 +5,7 @@ if(MSVC)
 		w32-pthreads)
 endif()
 
+#add multiple-image-source
 set(image-source_HEADERS
 	multiple-image-source.h)
 

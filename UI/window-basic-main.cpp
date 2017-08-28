@@ -5711,7 +5711,7 @@ void OBSBasic::on_testButton_clicked(){
 		obs_source_update(source, settings);
 
 		obs_source_release(source);
-		_cnt++;
+		_cnt++;//1
 	}
 	else{
 		OBSScene scene = GetCurrentScene();

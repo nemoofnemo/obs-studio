@@ -1031,7 +1031,7 @@ static void mis_paint_pages(mis_pages_t * pages){
 }
 
 /* ------------------------------------------------------------------------- */
-
+//1s
 static void mis_paint(multiple_image_source_t * mis){
 	mis_paint_pages(&mis->pages);
 }

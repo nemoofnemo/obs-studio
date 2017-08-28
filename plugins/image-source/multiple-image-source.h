@@ -276,7 +276,7 @@ static void mis_paint_shape_array(mis_shape_array_t * arr);
 static void mis_init_pages(mis_pages_t * pages);
 
 static void mis_destroy_pages(mis_pages_t * pages);
-//create and push a new page to mis_pages
+//create and push a new page to mis_pages.
 static void mis_push_new_page(mis_pages_t * pages);
 
 static mis_shape_array_t * mis_get_page(mis_pages_t * pages, size_t idx);
