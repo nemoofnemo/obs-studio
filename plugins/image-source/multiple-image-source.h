@@ -130,7 +130,6 @@ typedef struct mis_node mis_node_t;
 
 struct mis_shape_array{
 	DARRAY(mis_node_t) shape_array;
-	//pen_source_shape_t paint_status;
 };
 typedef struct mis_shape_array mis_shape_array_t;
 
@@ -172,9 +171,7 @@ struct multiple_image_source {
 
 	uint32_t width;
 	uint32_t height;
-	mis_line_t * line;
-	mis_rectangle_t * rect;
-	mis_polyline_t * polyline;
+	mis_pages_t pages;
 };
 typedef struct multiple_image_source multiple_image_source_t;
 
@@ -266,7 +263,11 @@ static void mis_init_shape_array(mis_shape_array_t * arr);
 
 static void mis_destroy_shape_array(mis_shape_array_t * arr);
 //shape must be setup first.
-static void mis_push_shape_array(mis_shape_array_t * arr, mis_node_t * shape);
+static void mis_push_shape_array(mis_shape_array_t * arr, mis_shape_t shape, void * data);
+
+static mis_node_t * mis_get_from_array(mis_shape_array_t * arr, size_t idx);
+
+static mis_node_t * mis_get_last_from_array(mis_shape_array_t * arr);
 
 static void mis_paint_shape_array(mis_shape_array_t * arr);
 
@@ -274,22 +275,28 @@ static void mis_paint_shape_array(mis_shape_array_t * arr);
 //pages
 static void mis_init_pages(mis_pages_t * pages);
 
+static void mis_destroy_pages(mis_pages_t * pages);
 //create and push a new page to mis_pages
 static void mis_push_new_page(mis_pages_t * pages);
 
 static mis_shape_array_t * mis_get_page(mis_pages_t * pages, size_t idx);
 
-static void mis_push_shape_to_page(mis_pages_t * pages, size_t idx, mis_node_t * shape);
+//static void mis_push_shape_to_page(mis_pages_t * pages, size_t idx, mis_node_t * shape);
 
-static void mis_remove_shape_from_page();
+//static void mis_remove_shape_from_page();
 
-static void mis_remove_page(mis_pages_t * pages, size_t idx);
+//static void mis_remove_page(mis_pages_t * pages, size_t idx);
+
+static void mis_pages_prev(mis_pages_t * pages);
+
+static void mis_pages_next(mis_pages_t * pages);
 
 static void mis_paint_pages(mis_pages_t * pages);
 
-static void mis_paint(multiple_image_source_t * mis);
 
 /* ------------------------------------------------------------------------- */
+
+static void mis_paint(multiple_image_source_t * mis);
 
 static obs_source_t *get_transition(struct multiple_image_source *mis);
 
@@ -322,6 +329,8 @@ static void mis_destroy(void *data);
 static void *mis_create(obs_data_t *settings, obs_source_t *source);
 
 static void mis_video_render(void *data, gs_effect_t *effect);
+
+static void mis_process_paint_event(multiple_image_source_t * mis, obs_data_t * settings);
 
 static void mis_video_tick(void *data, float seconds);
 

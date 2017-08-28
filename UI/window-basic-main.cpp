@@ -288,7 +288,7 @@ OBSBasic::OBSBasic(QWidget *parent)
 	assignDockToggle(ui->controlsDock, ui->toggleControls);
 
 	//test
-	connect(ui->testButton, &QPushButton::clicked, this, &OBSBasic::on_testButton_clicked);
+	//connect(ui->testButton, &QPushButton::clicked, this, &OBSBasic::on_testButton_clicked);
 }
 
 static void SaveAudioDevice(const char *name, int channel, obs_data_t *parent,
@@ -5721,6 +5721,8 @@ void OBSBasic::on_testButton_clicked(){
 		obs_source_t * s = obs_sceneitem_get_source(item);
 		OBSData settings = obs_source_get_settings(s);
 		obs_data_set_string(settings, "direction", "next");
+		obs_data_set_int(settings, "test_x", 500);
+		obs_data_set_int(settings, "test_y", 500);
 		obs_data_release(settings);
 	}
 }
