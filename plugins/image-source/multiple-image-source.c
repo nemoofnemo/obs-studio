@@ -353,8 +353,10 @@ static void *mis_create(obs_data_t *settings, obs_source_t *source)
 	mis_push_back_polyline_node(polyline, 150, 130);
 	mis_push_back_polyline_node(polyline, 190, 210);
 	mis_push_back_polyline_node(polyline, 160, 103);
-	mis_push_back_polyline_node(polyline, 10, 21);
 	mis_setup_polyline(polyline);
+	mis_push_back_polyline_node(polyline, 300, 300);
+	mis_push_back_polyline_node(polyline, 300, 400);
+	mis_update_polyline(polyline);
 	
 	mis_push_shape_array(mis_get_page(&mis->pages, 0), LINE, line);
 	mis_push_shape_array(mis_get_page(&mis->pages, 0), RECTANGLE, rect);
@@ -1031,7 +1033,7 @@ static void mis_paint_pages(mis_pages_t * pages){
 }
 
 /* ------------------------------------------------------------------------- */
-//1s
+
 static void mis_paint(multiple_image_source_t * mis){
 	mis_paint_pages(&mis->pages);
 }

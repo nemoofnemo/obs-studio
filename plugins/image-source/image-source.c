@@ -279,7 +279,6 @@ bool obs_module_load(void)
 	obs_register_source(&image_source_info);
 	obs_register_source(&color_source_info);
 	obs_register_source(&slideshow_info);
-	//add
 	obs_register_source(&multiple_image_source_info);
 	obs_register_source(&pen_source_info);
 	return true;
